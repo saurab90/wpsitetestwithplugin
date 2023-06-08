@@ -27,6 +27,8 @@
     wp_enqueue_script('aas-plugin-ui-script', plugins_url('js/saa-jqui.js', __FILE__), array(), '1.0.0', 'true');
     wp_enqueue_script('aas-plugin-frormbuilder-script', plugins_url('js/saa-formbuilder.js', __FILE__), array(), '1.0.0', 'true');
 
+    wp_enqueue_script('aas-plugin-frormrender-script', plugins_url('js/saa-formrender.js', __FILE__), array(), '1.0.0', 'true');
+
   }
   add_action( "wp_enqueue_scripts", "aas_enqueue_scripts" );
 
@@ -35,11 +37,13 @@
     wp_enqueue_script('aas-plugin-ui-script', plugins_url('js/saa-jqui.js', __FILE__), array(), '1.0.0', 'true');
     wp_enqueue_script('aas-plugin-frormbuilder-script', plugins_url('js/saa-formbuilder.js', __FILE__), array(), '1.0.0', 'true');
 
+    wp_enqueue_script('aas-plugin-frormrender-script', plugins_url('js/saa-formrender.js', __FILE__), array(), '1.0.0', 'true');
+
   }
   add_action( "admin_enqueue_scripts", "aas_enqueue_admin_scripts" );
   // jQuery Plugin Setting Activation
   
-  
+  /*
   function aas_scroll_script(){?>
         <script>
             jQuery(document).ready(function () {
@@ -51,8 +55,8 @@
 
 <?php }
 
-add_action( "wp_footer", "aas_scroll_script" );
-
+// add_action( "wp_footer", "aas_scroll_script" );
+*/
 
 
 
@@ -68,24 +72,50 @@ function saa_custom_menu(){
 }
 
 function call_back_fn(){
-
 ?>
         <script>
             jQuery(document).ready(function () {
                 jQuery(function($){
-                        //$(document.getElementById('myformbuilder')).formBuilder();
                         jQuery(($) => {
-                                        const fbEditor = document.getElementById("build-wrap");
+                                        const fbEditor = document.getElementById("build-wrap"); // for building form 
                                         const formBuilder = $(fbEditor).formBuilder();
 
+                                        const fbRender = document.getElementById("fb-render");  // for rendering the form elements
+
                                         document.getElementById("saveData").addEventListener("click", () => {
-                                          console.log("external save clicked");
+                                        console.log("external save clicked");
                                           const result = formBuilder.actions.save();
                                           //console.log("result:", result);
                                           console.log(result);
 
+                                          const renderData = $.parseJSON(result); // making array from string data
+                                          var formData = JSON.stringify(renderData);
+                                          $(fbRender).formRender({ formData });
+
                                         });
+
                                       });
+
+                            // Form render part
+                            // const getUserDataBtn = document.getElementById("get-user-data");
+                            // const fbRender = document.getElementById("fb-render");
+                            //  const originalFormData = [{"type":"text","required":false,"label":"Text Field","className":"form-control","name":"text-1686113504036","access":false,"value":"amran","subtype":"text"},{"type":"number","required":false,"label":"Number","className":"form-control","name":"number-1686113509221","access":false,"value":"1234"},{"type":"header","subtype":"h1","label":"Header","access":false}];
+
+                            // //var originalFormData = [data];
+
+                            // jQuery(function($) {
+                            //   var formData = JSON.stringify(originalFormData);
+                            //   //var formData = JSON.stringify(mdata);
+
+                            //   $(fbRender).formRender({ formData });
+                            //   getUserDataBtn.addEventListener(
+                            //     "click",
+                            //     () => {
+                            //       window.alert(window.JSON.stringify($(fbRender).formRender("userData")));
+                            //     },
+                            //     false
+                            //   );
+                            // });
                     });
             });
         </script>
@@ -93,9 +123,13 @@ function call_back_fn(){
     <div class="saveDataWrap">
       <button id="saveData" type="button">External Save Button</button>
     </div>
-    
-    <div id="build-wrap"></div>
 
+    <div id="build-wrap"></div>
+          </br>
+          <h4> save console data to database and retrive it and show the real form like below</h4>
+    <form id="fb-render"></form>
+
+    <button type="button" id="get-user-data">Get Updated formData</button>
 
 <?php
 
