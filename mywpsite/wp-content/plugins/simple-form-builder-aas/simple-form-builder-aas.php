@@ -39,8 +39,14 @@
 
     wp_enqueue_script('aas-plugin-frormrender-script', plugins_url('js/saa-formrender.js', __FILE__), array(), '1.0.0', 'true');
 
+    wp_localize_script( 'jquery', 'my_ajax_vars', array(
+      'ajaxurl'       => admin_url( 'admin-ajax.php' )
+    ));
+
   }
   add_action( "admin_enqueue_scripts", "aas_enqueue_admin_scripts" );
+
+ 
   // jQuery Plugin Setting Activation
   
   /*
@@ -72,6 +78,21 @@ function saa_custom_menu(){
 }
 
 function call_back_fn(){
+//   if ( isset( $_POST['submit'] ) ){
+                                            
+//     global $wpdb;
+
+
+//     $tablename=$wpdb->prefix.'posts';
+
+//     $data=array(
+//         'post_content' => '123'
+//       );
+
+
+//     $wpdb->insert( $tablename, $data);
+// }
+
 ?>
         <script>
             jQuery(document).ready(function () {
@@ -88,11 +109,33 @@ function call_back_fn(){
                                           //console.log("result:", result);
                                           console.log(result);
 
-                                          const renderData = $.parseJSON(result); // making array from string data
-                                          var formData = JSON.stringify(renderData);
+                                          const renderData = $.parseJSON(result); // making  fromdata array of string
+                                           const formData = JSON.stringify(renderData);
                                           $(fbRender).formRender({ formData });
+                                          
+
+                                          //var car = 'BMW';
+                                          var car = formData;   // using ajax to send data into wordpress database
+                                                    $.ajax({
+                                                      type: 'POST', 
+                                                      url: ajaxurl,
+                                                      data: {
+                                                        'action': 'favourit_car',
+                                                        'f_car':car,
+                                                      },
+                                                      success: function (data) {
+                                                      alert('success');
+                                                      
+                                                      },
+                                                      error: function () {
+                                                      alert('fail');
+                                                      }
+                                                    });
+
 
                                         });
+
+
 
                                       });
 
@@ -117,8 +160,12 @@ function call_back_fn(){
                             //   );
                             // });
                     });
+
+
+                   
             });
         </script>
+        
 
     <div class="saveDataWrap">
       <button id="saveData" type="button">External Save Button</button>
@@ -127,31 +174,10 @@ function call_back_fn(){
     <div id="build-wrap"></div>
           </br>
           <h4> save console data to database and retrive it and show the real form like below</h4>
+
     <form id="fb-render"></form>
 
-    <button type="button" id="get-user-data">Get Updated formData</button>
-
 <?php
-
-    //echo "hi... its working fine";
-
-    //$location = get_post_meta( $post->ID, 'omb_location', true );  // get post omb_location data from wordpress db and 'true' for single value field or it's consider as array default.
-	//$country  = get_post_meta( $post->ID, 'omb_country', true );   // get post omb_country data from wordpress db and 'true' for single value field or it's consider as array default.
-
-    //$label1   = __( 'Location', 'our-metabox' );
-    //$label2   = __( 'Country', 'our-metabox' );
-
-    // $metabox_html = <<<EOD
-    //                     <p>
-    //                     <label for="omb_location">{$label1}: </label>
-    //                     <input type="text" name="omb_location" id="omb_location" value=""/>
-    //                     <br/>
-    //                     <label for="omb_country">{$label2}: </label>
-    //                     <input type="text" name="omb_country" id="omb_country" value=""/>
-    //                     </p>
-    //                 EOD;
-
-    // echo $metabox_html;
 
     
 }
@@ -159,4 +185,22 @@ function call_back_fn(){
  add_action("admin_menu","saa_custom_menu");
 
 
- ?>
+ function my_favourit_car(){  // data save into wordpress Db
+
+    if(isset($_REQUEST)){
+      $my_car = $_REQUEST['f_car'];
+      echo 'My favourit car is:'.$my_car;
+      global $wpdb;
+      $wpdb->insert(
+          $wpdb->prefix.'posts',
+          [
+            'post_content'=> $my_car,
+          ]
+      );
+  
+    }
+}
+ add_action('wp_ajax_favourit_car','my_favourit_car');
+
+ 
+
