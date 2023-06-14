@@ -16,10 +16,11 @@
 
 
   // Including CSS
-//   function aas_enqueue_style(){
-//     wp_enqueue_style('aas-style', plugins_url('css/sstt-style.css', __FILE__));
-//   }
-//   add_action( "wp_enqueue_scripts", "sstt_enqueue_style" );
+  function aas_enqueue_style(){
+    wp_enqueue_style('aas-bootstrap-style', plugins_url('css/bootstrap.css', __FILE__));
+    wp_enqueue_style('aas-custom-style', plugins_url('css/custom.css', __FILE__));
+  }
+  add_action( "admin_enqueue_scripts", "aas_enqueue_style" );
 
   // Including JavaScript
   function aas_enqueue_scripts(){
@@ -134,6 +135,26 @@ function call_back_fn(){
 
                                         });
 
+                                        document.getElementById("saveFrmTitle").addEventListener("click", () => {
+                                          var frmTitleValue = $("#frm_title").val();
+                                                    $.ajax({
+                                                      type: 'POST', 
+                                                      url: ajaxurl,
+                                                      data: {
+                                                        'action': 'frm_title_data',
+                                                        't_data':frmTitleValue,
+                                                      },
+                                                      success: function (data) {
+                                                      alert('success');
+                                                      
+                                                      },
+                                                      error: function () {
+                                                      alert('fail');
+                                                      }
+                                                    });
+
+
+                                        });
 
 
                                       });
@@ -165,12 +186,28 @@ function call_back_fn(){
             });
         </script>
         
+        <br/>
 
-    <div class="saveDataWrap">
-      <button id="saveData" type="button">External Save Button</button>
+    <div class="form-group">
+      <div class= "col-md-8">
+      <label class="control-level">Form Title </lebel>
+        <input class= "form-group" type="text" name="frm_title" id="frm_title" value=""/>
+      </div>
+      <div class= "col-md-4">
+          <button class="btn btn-primary" id="saveFrmTitle" type="button">Save Form Title</button>
+      </div>
     </div>
 
+    <br/>
     <div id="build-wrap"></div>
+
+    <div class="row">
+      <div class= "col-md-4"></div>
+      <div class= "col-md-8">
+          <button id="saveData" type="button">External Save Button</button>
+      </div>
+    </div>
+
           </br>
           <h4> save console data to database and retrive it and show the real form like below</h4>
 
@@ -192,17 +229,40 @@ function call_back_fn(){
       
       global $wpdb;
       $wpdb->insert(
-          $wpdb->prefix.'posts',
+          //$wpdb->prefix.'posts',
+          $wpdb->prefix.'postmeta',
           [
-            'post_content'=> $my_data,
-            'post_date'=> $current_Date,
-            'post_date_gmt' => $current_Date,
+            'meta_value'=> $my_data,
+            'post_id'=> '84',
+            
           ]
       );
   
     }
 }
  add_action('wp_ajax_favourit_data','my_favourit_car');
+
+
+ 
+ function my_form_title(){  // data save into wordpress Db
+
+  if(isset($_REQUEST)){
+    $my_data = $_REQUEST['t_data'];
+    $current_Date = date("Y-m-d H:i:s");
+    
+    global $wpdb;
+    $wpdb->insert(
+        $wpdb->prefix.'posts',
+        [
+          'post_content'=> $my_data,
+          'post_date'=> $current_Date,
+          'post_date_gmt' => $current_Date,
+        ]
+    );
+
+  }
+}
+add_action('wp_ajax_frm_title_data','my_form_title');
 
  
 
