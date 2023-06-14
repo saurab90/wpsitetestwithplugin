@@ -112,16 +112,15 @@ function call_back_fn(){
                                           const renderData = $.parseJSON(result); // making  fromdata array of string
                                            const formData = JSON.stringify(renderData);
                                           $(fbRender).formRender({ formData });
-                                          
 
-                                          //var car = 'BMW';
-                                          var car = formData;   // using ajax to send data into wordpress database
+                                          
+                                          var rawdata = formData;   // using ajax to send data into wordpress database
                                                     $.ajax({
                                                       type: 'POST', 
                                                       url: ajaxurl,
                                                       data: {
-                                                        'action': 'favourit_car',
-                                                        'f_car':car,
+                                                        'action': 'favourit_data',
+                                                        't_data':rawdata,
                                                       },
                                                       success: function (data) {
                                                       alert('success');
@@ -188,19 +187,22 @@ function call_back_fn(){
  function my_favourit_car(){  // data save into wordpress Db
 
     if(isset($_REQUEST)){
-      $my_car = $_REQUEST['f_car'];
-      echo 'My favourit car is:'.$my_car;
+      $my_data = $_REQUEST['t_data'];
+      $current_Date = date("Y-m-d H:i:s");
+      
       global $wpdb;
       $wpdb->insert(
           $wpdb->prefix.'posts',
           [
-            'post_content'=> $my_car,
+            'post_content'=> $my_data,
+            'post_date'=> $current_Date,
+            'post_date_gmt' => $current_Date,
           ]
       );
   
     }
 }
- add_action('wp_ajax_favourit_car','my_favourit_car');
+ add_action('wp_ajax_favourit_data','my_favourit_car');
 
  
 
