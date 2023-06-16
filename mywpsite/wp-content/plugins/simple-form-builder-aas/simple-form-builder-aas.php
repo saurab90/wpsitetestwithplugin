@@ -79,32 +79,18 @@ function saa_custom_menu(){
 }
 
 function call_back_fn(){
-//   if ( isset( $_POST['submit'] ) ){
-                                            
-//     global $wpdb;
-
-
-//     $tablename=$wpdb->prefix.'posts';
-
-//     $data=array(
-//         'post_content' => '123'
-//       );
-
-
-//     $wpdb->insert( $tablename, $data);
-// }
-
 ?>
         <script>
             jQuery(document).ready(function () {
                 jQuery(function($){
                         jQuery(($) => {
+                                        var postId = '';
                                         const fbEditor = document.getElementById("build-wrap"); // for building form 
                                         const formBuilder = $(fbEditor).formBuilder();
 
                                         const fbRender = document.getElementById("fb-render");  // for rendering the form elements
 
-                                        document.getElementById("saveData").addEventListener("click", () => {
+                                        document.getElementById("saveData").addEventListener("click", () => {  // save form data 
                                         console.log("external save clicked");
                                           const result = formBuilder.actions.save();
                                           //console.log("result:", result);
@@ -114,7 +100,7 @@ function call_back_fn(){
                                            const formData = JSON.stringify(renderData);
                                           $(fbRender).formRender({ formData });
 
-                                          
+                                         
                                           var rawdata = formData;   // using ajax to send data into wordpress database
                                                     $.ajax({
                                                       type: 'POST', 
@@ -122,6 +108,7 @@ function call_back_fn(){
                                                       data: {
                                                         'action': 'favourit_data',
                                                         't_data':rawdata,
+                                                        't_post_id':postId,
                                                       },
                                                       success: function (data) {
                                                       alert('success');
@@ -135,7 +122,7 @@ function call_back_fn(){
 
                                         });
 
-                                        document.getElementById("saveFrmTitle").addEventListener("click", () => {
+                                        document.getElementById("saveFrmTitle").addEventListener("click", () => {  // save form title data
                                           var frmTitleValue = $("#frm_title").val();
                                                     $.ajax({
                                                       type: 'POST', 
@@ -147,6 +134,8 @@ function call_back_fn(){
                                                       success: function (data) {
                                                       alert('success');
                                                       
+                                                      
+                                                      
                                                       },
                                                       error: function () {
                                                       alert('fail');
@@ -156,6 +145,47 @@ function call_back_fn(){
 
                                         });
 
+                                        jQuery("#getFrmTitlePostData").click(function(){
+                                          var jsonArray = "";
+                                            $.ajax({
+                                                      type: 'POST', 
+                                                      url: ajaxurl,
+                                                      data: {
+                                                        'action': 'call_my_ajax_handler',
+                                                        't_data':'',
+                                                      },
+                                                      success: function (data) {
+                                                      alert('success');
+                                                      console.log(data);
+
+                                                      $("#bodytable").empty();
+
+                                                      //Parse to an array of JSON objects
+                                                      jsonArray = JSON.parse(data);
+                                                      for (i=0;i<jsonArray.length;i++) {
+                                                        //alert(jsonArray[i].ID + ", " + jsonArray[i].post_date + ", " + jsonArray[i].post_content);
+                                                       
+                                                        //  $("#bodytable").append("<tr><td>" +jsonArray[i].ID  +"</td><td>" + jsonArray[i].post_content +"</td><td>" + jsonArray[i].post_date +"</td></tr>");
+
+                                                         $("#tblId").append('<tr id = "'+jsonArray[i].ID+'"><td>' + jsonArray[i].ID + '</td><td>' + jsonArray[i].post_content + '</td><td><button type="button" id="btn-' + jsonArray[i].ID + '" >Edit</button></td></tr>');
+
+                                                         
+                                                      }
+
+                                                      
+                                                      },
+                                                      error: function () {
+                                                      alert('fail');
+                                                      }
+                                                    });
+                                        });
+
+                                        $('#tblId').on('click','tr', function() {
+                                          //alert( $( this ).text() );
+                                          var row = $(this).closest('tr');
+                                          var id = $(row).find('td').eq(0).html();
+                                          postId = id; // assign id in postId
+                                        });
 
                                       });
 
@@ -194,7 +224,9 @@ function call_back_fn(){
         <input class= "form-group" type="text" name="frm_title" id="frm_title" value=""/>
       </div>
       <div class= "col-md-4">
-          <button class="btn btn-primary" id="saveFrmTitle" type="button">Save Form Title</button>
+          <button class="btn btn-success" id="saveFrmTitle" type="button">Save Form Title</button>
+          <button class="btn btn-primary" id="getFrmTitlePostData" type="button">Get Form Title</button>
+          
       </div>
     </div>
 
@@ -211,7 +243,24 @@ function call_back_fn(){
           </br>
           <h4> save console data to database and retrive it and show the real form like below</h4>
 
-    <form id="fb-render"></form>
+    <form id="fb-render" enctype="multipart/form-data">
+      
+    </form>
+
+    <table class="table" id = "tblId">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>POST Content</th>
+            <th>POST Date</th>
+            
+            <th></th>
+        </tr>
+        </thead>
+        <tbody id = "bodytable" >
+
+        </tbody>
+    </table>
 
 <?php
 
@@ -224,7 +273,8 @@ function call_back_fn(){
  function my_favourit_car(){  // data save into wordpress Db
 
     if(isset($_REQUEST)){
-      $my_data = $_REQUEST['t_data'];
+      $my_data = $_REQUEST['t_data'];  // all form data
+      $my_frmpost_Id = $_REQUEST['t_post_id']; // form title id
       $current_Date = date("Y-m-d H:i:s");
       
       global $wpdb;
@@ -233,7 +283,9 @@ function call_back_fn(){
           $wpdb->prefix.'postmeta',
           [
             'meta_value'=> $my_data,
-            'post_id'=> '84',
+            //'post_id'=> '84',
+            'post_id'=> $my_frmpost_Id,
+            
             
           ]
       );
@@ -245,7 +297,6 @@ function call_back_fn(){
 
  
  function my_form_title(){  // data save into wordpress Db
-
   if(isset($_REQUEST)){
     $my_data = $_REQUEST['t_data'];
     $current_Date = date("Y-m-d H:i:s");
@@ -257,12 +308,33 @@ function call_back_fn(){
           'post_content'=> $my_data,
           'post_date'=> $current_Date,
           'post_date_gmt' => $current_Date,
+          'post_title' => 'saa-form-title',
         ]
     );
 
   }
 }
+
+
 add_action('wp_ajax_frm_title_data','my_form_title');
 
- 
+function my_ajax_handler(){
+  global $wpdb;
+  //$programs = $wpdb->get_results("SELECT * FROM wp_posts where post_content = 'Test Form Title'");
+  $programs = $wpdb->get_results("SELECT * FROM wp_posts where post_title = 'saa-form-title'");
 
+ 
+  $tv=array();
+  foreach ( $programs as $program) 
+  {
+     
+       $tv[]=$program;
+      // $tv[]=$program->post_content;
+      // $tv[]=$program->post_date;
+  }
+  echo json_encode($tv);
+  
+  wp_die();
+}
+add_action( 'wp_ajax_call_my_ajax_handler', 'my_ajax_handler' );
+add_action( 'wp_ajax_nopriv_call_my_ajax_handler', 'my_ajax_handler' );
