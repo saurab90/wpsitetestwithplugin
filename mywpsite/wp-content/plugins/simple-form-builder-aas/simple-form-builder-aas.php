@@ -84,30 +84,108 @@ function call_back_fn(){
             jQuery(document).ready(function () {
                 jQuery(function($){
                         jQuery(($) => {
+                                        $('.btn-group').hide(); // hide form data default btn save, clear,getdata
+                          
+                                        $("#savefrmEntry").hide(); // hide form data entry btn
                                         var postId = '';
+
                                         const fbEditor = document.getElementById("build-wrap"); // for building form 
                                         const formBuilder = $(fbEditor).formBuilder();
-
                                         const fbRender = document.getElementById("fb-render");  // for rendering the form elements
 
-                                        document.getElementById("saveData").addEventListener("click", () => {  // save form data 
-                                        console.log("external save clicked");
-                                          const result = formBuilder.actions.save();
-                                          //console.log("result:", result);
-                                          console.log(result);
+                                        // default show the saved From tile(start)
+                                        var jsonArray = "";
+                                            $.ajax({
+                                                      type: 'POST', 
+                                                      url: ajaxurl,
+                                                      data: {
+                                                        'action': 'call_my_ajax_handler',
+                                                        't_data':'',
+                                                      },
+                                                      success: function (data) {
+                                                      //alert('success');
+                                                      //console.log(data);
 
-                                          const renderData = $.parseJSON(result); // making  fromdata array of string
-                                           const formData = JSON.stringify(renderData);
-                                          $(fbRender).formRender({ formData });
+                                                      $("#bodytable").empty();
 
-                                         
-                                          var rawdata = formData;   // using ajax to send data into wordpress database
+                                                      //Parse to an array of JSON objects
+                                                      jsonArray = JSON.parse(data);
+                                                      for (i=0;i<jsonArray.length;i++) {
+                                                        //alert(jsonArray[i].ID + ", " + jsonArray[i].post_date + ", " + jsonArray[i].post_content);
+                                                       
+                                                         $("#tblId").append('<tr id = "'+jsonArray[i].ID+'"><td>' + jsonArray[i].ID + '</td><td>' + jsonArray[i].post_content + 
+                                                         '</td><td><button type="button" id="btn-DataEntry" >Data Entry</button></td></tr>');
+                                                      }
+
+                                                    },
+                                                      error: function () {
+                                                      alert('fail');
+                                                      }
+                                                    });
+                                        // default show the saved From tile(end)
+                                        
+                                        //get all saved Form Templete here
+                                        function getFromTemplate(){
+                                          var jsonFormattedString = '';
+                                                      $.ajax({
+                                                                type: 'POST', 
+                                                                url: ajaxurl,
+                                                                data: {
+                                                                  'action': 'call_my_ajax_handler_temp',
+                                                                  't_postid_data':postId,
+                                                                },
+                                                                success: function (data) {
+                                                                alert('success');
+                                                                  
+                                                                //Parse to an array of JSON objects
+                                                                 var jArray = JSON.parse(data);
+
+                                                                for (i=0;i<jArray.length;i++) {
+                                                                  
+                                                                  var ydata = jArray[i];
+
+                                                                  jsonFormattedString = ydata.replaceAll("\\", "");
+                                                                  jsonArray = JSON.parse(jsonFormattedString);
+                                                                  //$(fbRender).formRender({ jsonFormattedString });
+
+                                                                }
+
+                                                    const fbRender = document.getElementById("fb-render");
+                                                    jQuery(function($) {
+                                                      var formData = JSON.stringify(jsonArray);
+                                                      $(fbRender).formRender({ formData });
+                                                    
+                                                    });
+                                                 },
+                                                          error: function () {
+                                                          alert('fail');
+                                                      }
+                                                              });
+                                          }
+                                          //getFromTemplate();  // call get all saved Form Templete
+
+                                     // saving from Data entry    
+                                    function savedata(){
+                                      var sendingdata = getFormData('#fb-render');
+                                                        function getFormData(dom_query){
+                                                              var out = {};
+                                                              var s_data = $(dom_query).serializeArray();
+                                                              //transform into simple data/value object
+                                                              for(var i = 0; i<s_data.length; i++){
+                                                                  var record = s_data[i];
+                                                                  out[record.name] = record.value;
+                                                              }
+                                                              return out;
+                                                          }
+                                          //console.log(sendingdata);
+                                          const formData = JSON.stringify(sendingdata); // json stringify is must to send data
+
                                                     $.ajax({
                                                       type: 'POST', 
                                                       url: ajaxurl,
                                                       data: {
                                                         'action': 'favourit_data',
-                                                        't_data':rawdata,
+                                                        't_data':formData,
                                                         't_post_id':postId,
                                                       },
                                                       success: function (data) {
@@ -119,22 +197,34 @@ function call_back_fn(){
                                                       }
                                                     });
 
+                                      } 
 
+                                        document.getElementById("saveData").addEventListener("click", () => {  // btn save form data 
+                                              savedata(); // call save function for data entry
                                         });
 
                                         document.getElementById("saveFrmTitle").addEventListener("click", () => {  // save form title data
+                                          const result = formBuilder.actions.save();
+                                          console.log(result);
+
+                                          const renderData = $.parseJSON(result); // making  fromdata array of string
+                                          const formData = JSON.stringify(renderData);
+                                          $(fbRender).formRender({ formData });
+
+                                         
+                                          var rawdata = formData;   // using ajax to send data into wordpress database
+
                                           var frmTitleValue = $("#frm_title").val();
                                                     $.ajax({
                                                       type: 'POST', 
                                                       url: ajaxurl,
                                                       data: {
                                                         'action': 'frm_title_data',
-                                                        't_data':frmTitleValue,
+                                                        't_frmtitle_data':frmTitleValue,
+                                                        't_data':rawdata,
                                                       },
                                                       success: function (data) {
                                                       alert('success');
-                                                      
-                                                      
                                                       
                                                       },
                                                       error: function () {
@@ -145,46 +235,55 @@ function call_back_fn(){
 
                                         });
 
-                                        jQuery("#getFrmTitlePostData").click(function(){
-                                          var jsonArray = "";
-                                            $.ajax({
-                                                      type: 'POST', 
-                                                      url: ajaxurl,
-                                                      data: {
-                                                        'action': 'call_my_ajax_handler',
-                                                        't_data':'',
-                                                      },
-                                                      success: function (data) {
-                                                      alert('success');
-                                                      console.log(data);
+                                        // jQuery("#getFrmTitlePostData").click(function(){
+                                        //   var jsonArray = "";
+                                        //     $.ajax({
+                                        //               type: 'POST', 
+                                        //               url: ajaxurl,
+                                        //               data: {
+                                        //                 'action': 'call_my_ajax_handler',
+                                        //                 't_data':'',
+                                        //               },
+                                        //               success: function (data) {
+                                        //               alert('success');
+                                        //               console.log(data);
 
-                                                      $("#bodytable").empty();
+                                        //               $("#bodytable").empty();
 
-                                                      //Parse to an array of JSON objects
-                                                      jsonArray = JSON.parse(data);
-                                                      for (i=0;i<jsonArray.length;i++) {
-                                                        //alert(jsonArray[i].ID + ", " + jsonArray[i].post_date + ", " + jsonArray[i].post_content);
+                                        //               //Parse to an array of JSON objects
+                                        //               jsonArray = JSON.parse(data);
+                                        //               for (i=0;i<jsonArray.length;i++) {
+                                        //                 //alert(jsonArray[i].ID + ", " + jsonArray[i].post_date + ", " + jsonArray[i].post_content);
                                                        
-                                                        //  $("#bodytable").append("<tr><td>" +jsonArray[i].ID  +"</td><td>" + jsonArray[i].post_content +"</td><td>" + jsonArray[i].post_date +"</td></tr>");
+                                        //                 //  $("#bodytable").append("<tr><td>" +jsonArray[i].ID  +"</td><td>" + jsonArray[i].post_content +"</td><td>" + jsonArray[i].post_date +"</td></tr>");
 
-                                                         $("#tblId").append('<tr id = "'+jsonArray[i].ID+'"><td>' + jsonArray[i].ID + '</td><td>' + jsonArray[i].post_content + '</td><td><button type="button" id="btn-' + jsonArray[i].ID + '" >Edit</button></td></tr>');
+                                        //                  $("#tblId").append('<tr id = "'+jsonArray[i].ID+'"><td>' + jsonArray[i].ID + '</td><td>' + jsonArray[i].post_content + '</td><td><button type="button" id="btn-' + jsonArray[i].ID + '" >Create Form</button></td></tr>');
 
                                                          
-                                                      }
+                                        //               }
 
                                                       
-                                                      },
-                                                      error: function () {
-                                                      alert('fail');
-                                                      }
-                                                    });
-                                        });
+                                        //               },
+                                        //               error: function () {
+                                        //               alert('fail');
+                                        //               }
+                                        //             });
+                                        // });
 
                                         $('#tblId').on('click','tr', function() {
+                                         
                                           //alert( $( this ).text() );
                                           var row = $(this).closest('tr');
                                           var id = $(row).find('td').eq(0).html();
                                           postId = id; // assign id in postId
+                                          
+                                          $("#tblId").find("tr:gt(1)").remove();
+
+                                          $("#build-wrap").hide(); // hide builder form
+                                          getFromTemplate();  // call get all saved Form Templete
+                                         
+                                          $("#savefrmEntry").show(); // hide form data entry btn
+
                                         });
 
                                       });
@@ -224,8 +323,8 @@ function call_back_fn(){
         <input class= "form-group" type="text" name="frm_title" id="frm_title" value=""/>
       </div>
       <div class= "col-md-4">
-          <button class="btn btn-success" id="saveFrmTitle" type="button">Save Form Title</button>
-          <button class="btn btn-primary" id="getFrmTitlePostData" type="button">Get Form Title</button>
+          <!-- <button class="btn btn-success" id="saveFrmTitle" type="button">Save Form Title</button> -->
+          <!-- <button class="btn btn-primary" id="getFrmTitlePostData" type="button">Get Form Title</button> -->
           
       </div>
     </div>
@@ -234,18 +333,25 @@ function call_back_fn(){
     <div id="build-wrap"></div>
 
     <div class="row">
-      <div class= "col-md-4"></div>
-      <div class= "col-md-8">
+      <div class= "col-md-4" id="savefrmEntry">
           <button id="saveData" type="button">External Save Button</button>
+
+      </div>
+      <div class= "col-md-8">
+          <button class="btn btn-success" id="saveFrmTitle" type="button">Save Form </button>
       </div>
     </div>
 
           </br>
           <h4> save console data to database and retrive it and show the real form like below</h4>
+          
+  <!-- <div id="fb-render">
+      <form  enctype="multipart/form-data"></form>
+  </div> -->
+    
+  <form id="fb-render" enctype="multipart/form-data">    </form>
 
-    <form id="fb-render" enctype="multipart/form-data">
-      
-    </form>
+
 
     <table class="table" id = "tblId">
         <thead>
@@ -295,17 +401,41 @@ function call_back_fn(){
  add_action('wp_ajax_favourit_data','my_favourit_car');
 
 
+//  function my_post_form_template(){  // data save into wordpress Db
+
+//   if(isset($_REQUEST)){
+//     $my_data = $_REQUEST['t_frmtitle_data'];  // all form data
+//     //$my_frmpost_Id = $_REQUEST['t_post_id']; // form title id
+//     $current_Date = date("Y-m-d H:i:s");
+    
+//     global $wpdb;
+//     $wpdb->insert(
+//         $wpdb->prefix.'posts',
+//         [
+//           'post_content'=> $my_data,
+//           'post_date'=> $current_Date,
+//           'post_date_gmt' => $current_Date,
+//           'post_title' => 'saa-form-title',
+//         ]
+//     );
+
+//   }
+// }
+// add_action('wp_ajax_favourit_data','my_post_form_template');
+
  
  function my_form_title(){  // data save into wordpress Db
   if(isset($_REQUEST)){
-    $my_data = $_REQUEST['t_data'];
+    $my_frmdata = $_REQUEST['t_data'];  // all form data
+    $my_frmtitledata = $_REQUEST['t_frmtitle_data'];
     $current_Date = date("Y-m-d H:i:s");
     
     global $wpdb;
     $wpdb->insert(
         $wpdb->prefix.'posts',
         [
-          'post_content'=> $my_data,
+          'post_content'=> $my_frmtitledata,
+          'post_content_filtered' => $my_frmdata,
           'post_date'=> $current_Date,
           'post_date_gmt' => $current_Date,
           'post_title' => 'saa-form-title',
@@ -338,3 +468,31 @@ function my_ajax_handler(){
 }
 add_action( 'wp_ajax_call_my_ajax_handler', 'my_ajax_handler' );
 add_action( 'wp_ajax_nopriv_call_my_ajax_handler', 'my_ajax_handler' );
+
+
+
+
+function my_ajax_handler_tempdata(){
+  if(isset($_REQUEST)){
+    $my_frmPostId = $_REQUEST['t_postid_data'];  // all form data
+
+    global $wpdb;
+    $programs = $wpdb->get_results("SELECT post_content_filtered FROM wp_posts where ID = $my_frmPostId ");
+
+   
+    $tv=array();
+    foreach ( $programs as $program) 
+    {
+       
+         $tv[]=$program->post_content_filtered;
+        
+    }
+    echo json_encode($tv);
+    
+    wp_die();
+    
+  }
+ 
+}
+add_action( 'wp_ajax_call_my_ajax_handler_temp', 'my_ajax_handler_tempdata' );
+add_action( 'wp_ajax_nopriv_call_my_ajax_handler_temp', 'my_ajax_handler_tempdata' );
