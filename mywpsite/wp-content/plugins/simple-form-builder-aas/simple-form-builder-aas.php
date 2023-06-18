@@ -74,7 +74,7 @@
 */
 
 function saa_custom_menu(){
-    add_menu_page("saa list","Dummy test","manage_options","saa-list","call_back_fn");
+    add_menu_page("saa list","Build-Form","manage_options","saa-list","call_back_fn");
     
 }
 
@@ -114,7 +114,7 @@ function call_back_fn(){
                                                         //alert(jsonArray[i].ID + ", " + jsonArray[i].post_date + ", " + jsonArray[i].post_content);
                                                        
                                                          $("#tblId").append('<tr id = "'+jsonArray[i].ID+'"><td>' + jsonArray[i].ID + '</td><td>' + jsonArray[i].post_content + 
-                                                         '</td><td><button type="button" id="btn-DataEntry" >Data Entry</button></td></tr>');
+                                                         '</td><td><button class = "btn btn-info" type="button" id="btn-DataEntry" >Data Entry</button></td></tr>');
                                                       }
 
                                                     },
@@ -283,6 +283,9 @@ function call_back_fn(){
                                           getFromTemplate();  // call get all saved Form Templete
                                          
                                           $("#savefrmEntry").show(); // hide form data entry btn
+                                          $("#saveFrmTitle").hide(); // hide builder form save btn
+                                          $("#btn-DataEntry").hide(); // hide builder form save btn
+                                          $("#frmTitle").hide(); // hide builder form title div
 
                                         });
 
@@ -317,49 +320,51 @@ function call_back_fn(){
         
         <br/>
 
-    <div class="form-group">
-      <div class= "col-md-8">
-      <label class="control-level">Form Title </lebel>
-        <input class= "form-group" type="text" name="frm_title" id="frm_title" value=""/>
+    <div class="row" id = "frmTitle">
+      <div class= "col-md-8 frmTitle">
+        <div class= "form-group">
+        <label class="control-level">Form Title </lebel>
+          <input class= "form-group" type="text" name="frm_title" id="frm_title" value=""/>
+        </div>
       </div>
-      <div class= "col-md-4">
-          <!-- <button class="btn btn-success" id="saveFrmTitle" type="button">Save Form Title</button> -->
-          <!-- <button class="btn btn-primary" id="getFrmTitlePostData" type="button">Get Form Title</button> -->
-          
-      </div>
+      
     </div>
 
-    <br/>
-    <div id="build-wrap"></div>
+ 
+    <div id="build-wrap" class = "frmBuilder"></div>
 
     <div class="row">
-      <div class= "col-md-4" id="savefrmEntry">
-          <button id="saveData" type="button">External Save Button</button>
-
+      <div class= "col-md-4">
+         <button class="btn btn-success" id="saveFrmTitle" type="button">Save Form </button>
       </div>
-      <div class= "col-md-8">
-          <button class="btn btn-success" id="saveFrmTitle" type="button">Save Form </button>
-      </div>
+      <div class= "col-md-8"></div>
+      
     </div>
 
-          </br>
-          <h4> save console data to database and retrive it and show the real form like below</h4>
+    </br>
+    <!-- <h4> save console data to database and retrive it and show the real form like below</h4> -->
           
   <!-- <div id="fb-render">
       <form  enctype="multipart/form-data"></form>
   </div> -->
-    
-  <form id="fb-render" enctype="multipart/form-data">    </form>
+  
+  <form id="fb-render" enctype="multipart/form-data"> </form>
 
-
+  <div class="row">
+      <div class= "col-md-4" id="savefrmEntry">
+          <button id="saveData" type="button" class="btn btn-primary">External Save Button</button>
+      </div>
+      <div class= "col-md-8"> </div>
+  </div>
+  </br>
 
     <table class="table" id = "tblId">
         <thead>
         <tr>
             <th>ID</th>
             <th>POST Content</th>
-            <th>POST Date</th>
-            
+            <!-- <th>POST Date</th> -->
+            <th>Action</th>
             <th></th>
         </tr>
         </thead>

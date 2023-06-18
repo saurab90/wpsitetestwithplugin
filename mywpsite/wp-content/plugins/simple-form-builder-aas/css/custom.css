@@ -7,3 +7,12 @@ input[type=text], select {
     border-radius: 4px;
     box-sizing: border-box;
   }
+
+  .frmTitle{
+    /* background-color: rgb(238, 238, 215); */
+    padding-left:1%;
+  }
+  .frmBuilder{
+    width: 90%;
+    /* background-color: rgb(238, 238, 215); */
+  }
