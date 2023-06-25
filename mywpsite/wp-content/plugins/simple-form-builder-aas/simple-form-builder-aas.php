@@ -768,7 +768,7 @@ function call_back_fn_menu_03(){
                                                         //alert(jsonArray[i].ID + ", " + jsonArray[i].post_date + ", " + jsonArray[i].post_content);
                                                        
                                                          $("#tblId").append('<tr id = "'+jsonArray[i].ID+'"><td>' + jsonArray[i].ID + '</td><td>' + jsonArray[i].post_content + 
-                                                         '</td><td><button class = "btn btn-info" type="button" id="btn-DataEntry" >Data Entry</button></td></tr>');
+                                                         '</td><td><button class = "btn btn-info" type="button" id="btn-DataEntry" >Edit Templete</button></td></tr>');
                                                       }
 
                                                     },
@@ -825,11 +825,17 @@ function call_back_fn_menu_03(){
                                                       $(fbRender).formRender({ formData });
 
                                                        var result = formBuilder.actions.save();
-                                                       var str = result.replace(/[0-9`~!@#$%^&*()_|+\-=?;'.<>\[\]\\\/]/gi,'');
+                                                      //  var str = result.replace(/[0-9`~!@#$%^&*()_|+\-=?;'.<>\[\]\\\/]/gi,'');
+                                                        //var fdt = formData.replace(/[0-9`~!@#$%^&*()_|+\-=?;'.<>\]\\\/]/gi,'');
+                                                      //finalData = fdt +","+ str + "]";
 
-                                                       var fdt = formData.replace(/[0-9`~!@#$%^&*()_|+\-=?;'.<>\]\\\/]/gi,'');
+                                                        var str = result.replace('[','');
+                                                        //var str2 = str.replace(']','');
+                                                        var str2 = str.slice(0, -1); // Masteringjs.io
 
-                                                      finalData = fdt +","+ str + "]";
+                                                        //var fdt = formData.replace(']','');
+                                                        var fdt = formData.slice(0, -1); // Masteringjs.io
+                                                        finalData = fdt +","+ str2 + "]";
                                                       
                                                       const renderData = $.parseJSON(finalData); // making  fromdata array of string
                                                       const rawdata = JSON.stringify(renderData);
@@ -843,8 +849,8 @@ function call_back_fn_menu_03(){
                                                                   't_postid_data':postId,
                                                                     },
                                                                 success: function (data) {
-                                                                 alert('success');
-                                                                          
+                                                                    alert('success');
+                                                                    location.reload(true); // refresh the page
                                                                    },
                                                                  error: function () {
                                                                   alert('fail');
