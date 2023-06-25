@@ -76,6 +76,7 @@
 function saa_custom_menu(){
     add_menu_page("saa list","Build-Form","manage_options","saa-menu-01","call_back_fn_menu_01");
     add_submenu_page("saa-menu-01", "Get Form List", "Get Form List", 0, "saa-menu-02", "call_back_fn_menu_02");
+    add_submenu_page("saa-menu-01", "Form Templete Edit", "Form Templete Edit", 1, "saa-menu-03", "call_back_fn_menu_03");
 }
 
 function call_back_fn_menu_01(){
@@ -306,8 +307,10 @@ function call_back_fn_menu_02(){
                                         var postmetaId = '';
                                         $("#tblDataEntryId").hide();
 
-                                        //const fbEditor = document.getElementById("build-wrap"); // for building form 
-                                        //const formBuilder = $(fbEditor).formBuilder();
+                                        
+                                        const fbEditor = document.getElementById("build-wrap"); // for building form 
+                                        const formBuilder = $(fbEditor).formBuilder();
+
                                         const fbRender = document.getElementById("fb-render");  // for rendering the form elements
 
                                         // default show the saved From tile(start)
@@ -379,7 +382,7 @@ function call_back_fn_menu_02(){
                                                       }
                                                               });
                                           }
-
+                                          // get meta data form templete
                                           function getMetaDataFormTemplate(){
                                           var jsonFormattedString = '';
                                                       $.ajax({
@@ -491,6 +494,48 @@ function call_back_fn_menu_02(){
                                                       }
                                                               });
                                           }
+
+                                          // get form templete edit
+                                          function getFormTemplateEdit(){
+                                         
+                                          const formData = JSON.stringify($(fbRender).formRender("userData")); // json stringify is must to send data
+
+                                          //const result = formBuilder.actions.save();
+                                          //console.log(result);
+
+                                          //const renderData = $.parseJSON(result); // making  fromdata array of string
+                                          //const formData = JSON.stringify(renderData);
+                                          
+                                          //$(fbRender).formRender({ formData });  // rendering off when saveing form-title 
+
+                                         
+                                          var rawdata = formData;   // using ajax to send data into wordpress database
+
+                                             $.ajax({
+                                                                type: 'POST', 
+                                                                url: ajaxurl,
+                                                                data: {
+                                                                  'action': 'call_my_ajax_handler_formtempedit',
+                                                                  't_data':rawdata,
+                                                                  't_postid_data':postId,
+                                                                },
+                                                                success: function (data) {
+                                                                alert('success');
+                                                                  
+                                                                                            const fbRender = document.getElementById("fb-render");
+                                                                                            jQuery(function($) {
+                                                                                              //var formData = JSON.stringify(jsonArray);
+                                                                                              $(fbRender).formRender({ formData });
+                                                                                            
+                                                                                            });
+                                                                                        },
+                                                                    error: function () {
+                                                                        alert('fail');
+                                                                    }
+                                               });
+
+                                          }
+
                                      // saving from Data entry    
                                     function savedata(){
                                           const formData = JSON.stringify($(fbRender).formRender("userData")); // json stringify is must to send data
@@ -520,6 +565,10 @@ function call_back_fn_menu_02(){
 
                                         document.getElementById("saveData").addEventListener("click", () => {  // btn save form data 
                                               savedata(); // call save function for data entry
+                                        });
+                                        
+                                        document.getElementById("btnfrmTemEdit").addEventListener("click", () => {  // btn save form data 
+                                            getFormTemplateEdit(); // call save function for data entry
                                         });
 
                                           // updating from Data entry    
@@ -623,9 +672,11 @@ function call_back_fn_menu_02(){
           <form id="fb-render" enctype="multipart/form-data"> </form>
 
       </div>
-      <div class= "col-md-6"></div>
+      <div class= "col-md-6">
+          <!-- <div id="build-wrap" class = "frmBuilder"></div> -->
+      </div>
       
-    </div>
+  </div>
 
     <div class="row" id = "xid">
       
@@ -636,6 +687,7 @@ function call_back_fn_menu_02(){
   <div class="row">
       <div class= "col-md-4" id="savefrmEntry">
           <button id="saveData" type="button" class="btn btn-primary">Save Data</button>
+          <button class = "btn btn-primary" type="button" id="btnfrmTemEdit" >Form Templete Edit</button>
       </div>
       <div class= "col-md-8"> </div>
   </div>
@@ -673,6 +725,225 @@ function call_back_fn_menu_02(){
 
 <?php
 }
+
+function call_back_fn_menu_03(){
+  ?>
+        <script>
+            jQuery(document).ready(function () {
+                jQuery(function($){
+                        jQuery(($) => {
+                                        $('.btn-group').hide(); // hide form data default btn save, clear,getdata
+                          
+                                        $("#savefrmEntry").hide(); // hide form data entry btn
+                                        $("#updatefrmEntry").hide(); // hide form data update btn
+
+                                        var postId = '';
+                                        var postmetaId = '';
+                                        $("#tblDataEntryId").hide();
+
+                                        
+                                        const fbEditor = document.getElementById("build-wrap"); // for building form 
+                                        const formBuilder = $(fbEditor).formBuilder();
+
+                                        const fbRender = document.getElementById("fb-render");  // for rendering the form elements
+
+                                        // default show the saved From tile(start)
+                                        var jsonArray = "";
+                                            $.ajax({
+                                                      type: 'POST', 
+                                                      url: ajaxurl,
+                                                      data: {
+                                                        'action': 'call_my_ajax_handler',
+                                                        't_data':'',
+                                                      },
+                                                      success: function (data) {
+                                                      //alert('success');
+                                                      //console.log(data);
+
+                                                      $("#bodytable").empty();
+
+                                                      //Parse to an array of JSON objects
+                                                      jsonArray = JSON.parse(data);
+                                                      for (i=0;i<jsonArray.length;i++) {
+                                                        //alert(jsonArray[i].ID + ", " + jsonArray[i].post_date + ", " + jsonArray[i].post_content);
+                                                       
+                                                         $("#tblId").append('<tr id = "'+jsonArray[i].ID+'"><td>' + jsonArray[i].ID + '</td><td>' + jsonArray[i].post_content + 
+                                                         '</td><td><button class = "btn btn-info" type="button" id="btn-DataEntry" >Data Entry</button></td></tr>');
+                                                      }
+
+                                                    },
+                                                      error: function () {
+                                                      alert('fail');
+                                                      }
+                                                    });
+                                        // default show the saved From tile(end)
+                                        
+                                        //get all saved Form Templete here
+                                        function getFromTemplate(){
+                                          var jsonFormattedString = '';
+                                                      $.ajax({
+                                                                type: 'POST', 
+                                                                url: ajaxurl,
+                                                                data: {
+                                                                  'action': 'call_my_ajax_handler_temp',
+                                                                  't_postid_data':postId,
+                                                                },
+                                                                success: function (data) {
+                                                                alert('success');
+                                                                  
+                                                                //Parse to an array of JSON objects
+                                                                 var jArray = JSON.parse(data);
+
+                                                                for (i=0;i<jArray.length;i++) {
+                                                                  
+                                                                  var ydata = jArray[i];
+
+                                                                  jsonFormattedString = ydata.replaceAll("\\", "");
+                                                                  jsonArray = JSON.parse(jsonFormattedString);
+
+                                                                }
+
+                                                    const fbRender = document.getElementById("fb-render");
+                                                    jQuery(function($) {
+                                                      var formData = JSON.stringify(jsonArray);
+                                                      $(fbRender).formRender({ formData });
+                                                    });
+                                                 },
+                                                          error: function () {
+                                                          alert('fail');
+                                                      }
+                                                              });
+                                          }
+
+                                          // get form templete edit
+                                          function getFormTemplateEdit(){
+                                            var finalData = '';
+                                          //const formData = JSON.stringify($(fbRender).formRender("userData")); // json stringify is must to send data
+                                                    const fbRender = document.getElementById("fb-render");
+                                                    jQuery(function($) {
+                                                      var formData = JSON.stringify(jsonArray);
+                                                      $(fbRender).formRender({ formData });
+
+                                                       var result = formBuilder.actions.save();
+                                                       var str = result.replace(/[0-9`~!@#$%^&*()_|+\-=?;'.<>\[\]\\\/]/gi,'');
+
+                                                       var fdt = formData.replace(/[0-9`~!@#$%^&*()_|+\-=?;'.<>\]\\\/]/gi,'');
+
+                                                      finalData = fdt +","+ str + "]";
+                                                      
+                                                      const renderData = $.parseJSON(finalData); // making  fromdata array of string
+                                                      const rawdata = JSON.stringify(renderData);
+                                                      
+                                                      $.ajax({
+                                                               type: 'POST', 
+                                                               url: ajaxurl,
+                                                               data: {
+                                                                  'action': 'call_my_ajax_handler_formtempedit',
+                                                                  't_data':rawdata,
+                                                                  't_postid_data':postId,
+                                                                    },
+                                                                success: function (data) {
+                                                                 alert('success');
+                                                                          
+                                                                   },
+                                                                 error: function () {
+                                                                  alert('fail');
+                                                                  }
+                                                            });
+                                                      });
+
+                                          }
+
+                                    
+                                        document.getElementById("btnfrmTemEdit").addEventListener("click", () => {  // btn save form data 
+                                            getFormTemplateEdit(); // call save function for data entry
+                                        });
+
+
+                                        $('#tblId').on('click','tr', function() {
+                                         
+                                          //alert( $( this ).text() );
+                                          var row = $(this).closest('tr');
+                                          var id = $(row).find('td').eq(0).html();
+                                          postId = id; // assign id in postId
+                                          
+                                          //$("#tblId").find("tr:gt(0)").remove();
+                                          $("#tblId").hide();
+
+                                          $("#build-wrap").show(); // hide builder form
+
+                                          getFromTemplate();  // call get all saved Form Templete
+                                          //getFromDataEntry(); // get formed data
+                                          //getFormTemplateEdit();
+
+                                          $("#savefrmEntry").show(); // hide form data entry btn
+                                          $("#saveFrmTitle").hide(); // hide builder form save btn
+                                          $("#btn-DataEntry").hide(); // hide builder form save btn
+                                          $("#frmTitle").hide(); // hide builder form title div
+
+                                          $("#tblDataEntryId").show();
+
+                                        });
+
+                                });
+
+                           
+                    });
+
+
+                   
+            });
+        </script>
+        
+        <br/>
+   
+   
+  <div class="row">
+      <div class= "col-md-8">
+          <div id="build-wrap" class = "frmBuilder"></div>
+      </div>
+      <div class= "col-md-4">
+          <form id="fb-render" enctype="multipart/form-data"> </form>
+      </div>
+      
+  </div>
+
+    
+
+
+  <div class="row">
+      <div class= "col-md-4" id="savefrmEntry">
+          <!-- <button id="saveData" type="button" class="btn btn-primary">Save Data</button> -->
+          <button class = "btn btn-primary" type="button" id="btnfrmTemEdit" >Form Templete Edit</button>
+      </div>
+      <div class= "col-md-8"> </div>
+  </div>
+  </br>
+  <!-- <div class="row">
+      <div class= "col-md-4" id="updatefrmEntry">
+          <button id="saveData" type="button" class="btn btn-primary">Update Data</button>
+      </div>
+      <div class= "col-md-8"> </div>
+  </div> -->
+  </br>
+
+    <table class="table" id = "tblId">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Form Title</th>
+            <th>Action</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody id = "bodytable" >
+
+        </tbody>
+    </table>
+
+<?php
+}
+
 
  add_action("admin_menu","saa_custom_menu");
 
@@ -847,6 +1118,35 @@ function my_ajax_handler_metatempdata(){
 }
 add_action( 'wp_ajax_call_my_ajax_handler_metatemp', 'my_ajax_handler_metatempdata' );
 add_action( 'wp_ajax_nopriv_call_my_ajax_handler_metatemp', 'my_ajax_handler_metatempdata' );
+
+
+function my_ajax_handler_formtempedit(){
+  if(isset($_REQUEST)){
+    $my_data = $_REQUEST['t_data'];  // all form data
+    $my_frmPostId = $_REQUEST['t_postid_data'];  // all form data
+
+    global $wpdb;
+    //$programs = $wpdb->get_results("SELECT meta_value FROM wp_postmeta where meta_id = $my_frmPostId ");
+    $wpdb->update('wp_posts', array( 'post_content_filtered'=>$my_data), array('ID'=>$my_frmPostId));
+   
+    // $tv=array();
+    // foreach ( $programs as $program) 
+    // {
+       
+    //      $tv[]=$program->meta_value;
+        
+    // }
+    // echo json_encode($tv);
+    
+    //wp_die();
+    
+  }
+ 
+}
+add_action( 'wp_ajax_call_my_ajax_handler_formtempedit', 'my_ajax_handler_formtempedit' );
+add_action( 'wp_ajax_nopriv_call_my_ajax_handler_formtempedit', 'my_ajax_handler_formtempedit' );
+
+
 
 function my_ajax_handler_formdataentry(){
   if(isset($_REQUEST)){
