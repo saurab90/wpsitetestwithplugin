@@ -1,7 +1,7 @@
 <?php
 /**
- * Plugin Name:       Simple Form Builder aas
- * Plugin URI:        https://wordpress.org/plugins/simple-form-builder-aas/
+ * Plugin Name:       Simple Form Builder saa
+ * Plugin URI:        https://wordpress.org/plugins/simple-form-builder-saa/
  * Description:       Simple Form Builder Will Help You To Build Your Custome Form Easily.
  * Version:           1.0.0
  * Requires at least: 5.2
@@ -347,6 +347,7 @@ function call_back_fn_menu_02(){
                                         //get all saved Form Templete here
                                         function getFromTemplate(){
                                           var jsonFormattedString = '';
+                                          jsonArray = '';
                                                       $.ajax({
                                                                 type: 'POST', 
                                                                 url: ajaxurl,
@@ -496,45 +497,36 @@ function call_back_fn_menu_02(){
                                           }
 
                                           // get form templete edit
-                                          function getFormTemplateEdit(){
+                                        // function getFormTemplateEdit(){
                                          
-                                          const formData = JSON.stringify($(fbRender).formRender("userData")); // json stringify is must to send data
+                                        //   const formData = JSON.stringify($(fbRender).formRender("userData")); // json stringify is must to send data
 
-                                          //const result = formBuilder.actions.save();
-                                          //console.log(result);
+                                        //   var rawdata = formData;   // using ajax to send data into wordpress database
 
-                                          //const renderData = $.parseJSON(result); // making  fromdata array of string
-                                          //const formData = JSON.stringify(renderData);
-                                          
-                                          //$(fbRender).formRender({ formData });  // rendering off when saveing form-title 
-
-                                         
-                                          var rawdata = formData;   // using ajax to send data into wordpress database
-
-                                             $.ajax({
-                                                                type: 'POST', 
-                                                                url: ajaxurl,
-                                                                data: {
-                                                                  'action': 'call_my_ajax_handler_formtempedit',
-                                                                  't_data':rawdata,
-                                                                  't_postid_data':postId,
-                                                                },
-                                                                success: function (data) {
-                                                                alert('success');
+                                        //      $.ajax({
+                                        //                         type: 'POST', 
+                                        //                         url: ajaxurl,
+                                        //                         data: {
+                                        //                           'action': 'call_my_ajax_handler_formtempedit',
+                                        //                           't_data':rawdata,
+                                        //                           't_postid_data':postId,
+                                        //                         },
+                                        //                         success: function (data) {
+                                        //                         alert('success');
                                                                   
-                                                                                            const fbRender = document.getElementById("fb-render");
-                                                                                            jQuery(function($) {
-                                                                                              //var formData = JSON.stringify(jsonArray);
-                                                                                              $(fbRender).formRender({ formData });
+                                        //                                                     const fbRender = document.getElementById("fb-render");
+                                        //                                                     jQuery(function($) {
+                                        //                                                       //var formData = JSON.stringify(jsonArray);
+                                        //                                                       $(fbRender).formRender({ formData });
                                                                                             
-                                                                                            });
-                                                                                        },
-                                                                    error: function () {
-                                                                        alert('fail');
-                                                                    }
-                                               });
+                                        //                                                     });
+                                        //                                                 },
+                                        //                             error: function () {
+                                        //                                 alert('fail');
+                                        //                             }
+                                        //        });
 
-                                          }
+                                        //   }
 
                                      // saving from Data entry    
                                     function savedata(){
@@ -553,7 +545,7 @@ function call_back_fn_menu_02(){
                                                           alert('success');
                                                           //$("#tblId").find("tr:gt(0)").remove();
                                                           getFromDataEntry();
-                                                          $("#tblDataEntryId").show();
+                                                          //$("#tblDataEntryId").show();
                                                       
                                                       },
                                                       error: function () {
@@ -565,11 +557,12 @@ function call_back_fn_menu_02(){
 
                                         document.getElementById("saveData").addEventListener("click", () => {  // btn save form data 
                                               savedata(); // call save function for data entry
+                                              location.reload(true); // refresh the page
                                         });
                                         
-                                        document.getElementById("btnfrmTemEdit").addEventListener("click", () => {  // btn save form data 
-                                            getFormTemplateEdit(); // call save function for data entry
-                                        });
+                                        // document.getElementById("btnfrmTemEdit").addEventListener("click", () => {  // btn save form data 
+                                        //     getFormTemplateEdit(); // call save function for data entry
+                                        // });
 
                                           // updating from Data entry    
                                           function updatedata(){
@@ -617,8 +610,8 @@ function call_back_fn_menu_02(){
 
                                           $("#build-wrap").hide(); // hide builder form
 
-                                          getFromTemplate();  // call get all saved Form Templete
                                           getFromDataEntry(); // get formed data
+                                          getFromTemplate();  // call get saved Form Templete
 
                                           $("#savefrmEntry").show(); // hide form data entry btn
                                           $("#saveFrmTitle").hide(); // hide builder form save btn
@@ -641,7 +634,7 @@ function call_back_fn_menu_02(){
                                          $("#tblId").hide();
                                          $("#build-wrap").hide(); // hide builder form
 
-                                         //getFromTemplate();  // call get all saved Form Templete
+                                         //getFromTemplate();  // call get all saved Form Templete saurab:03072023
                                          getMetaDataFormTemplate();
                                         
                                          $("#savefrmEntry").hide(); // hide form data entry btn
@@ -687,7 +680,7 @@ function call_back_fn_menu_02(){
   <div class="row">
       <div class= "col-md-4" id="savefrmEntry">
           <button id="saveData" type="button" class="btn btn-primary">Save Data</button>
-          <button class = "btn btn-primary" type="button" id="btnfrmTemEdit" >Form Templete Edit</button>
+          <!-- <button class = "btn btn-primary" type="button" id="btnfrmTemEdit" >Form Templete Edit</button> -->
       </div>
       <div class= "col-md-8"> </div>
   </div>
@@ -781,6 +774,7 @@ function call_back_fn_menu_03(){
                                         //get all saved Form Templete here
                                         function getFromTemplate(){
                                           var jsonFormattedString = '';
+                                          jsonArray = '';
                                                       $.ajax({
                                                                 type: 'POST', 
                                                                 url: ajaxurl,
